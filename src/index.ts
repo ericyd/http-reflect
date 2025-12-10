@@ -1,12 +1,34 @@
-import { H3 } from "h3";
+import { EventHandlerRequest, H3, H3Event } from "h3";
 
 const app = new H3();
 
-app.get("/", async (event) => {
-  return Response.json({
-    validRoutes: ['/get', '/post', '/patch'],
-  });
-});
+app.get("/", reflect);
+app.post("/", reflect);
+app.get("/get", reflect);
+app.patch("/patch", reflect);
+app.post("/post", reflect);
+
+async function reflect(event: H3Event<EventHandlerRequest>): Promise<Response> {
+  const queryParams = queryParamsToJson(event.url.searchParams);
+
+  if (event.req.method === "GET") {
+    return Response.json(queryParams);
+  }
+
+  try {
+    const body = await event.req.json();
+    return Response.json({ ...body, ...queryParams });
+  } catch (error) {
+    // If request body is not valid JSON, return error, but include the query params
+    return Response.json(
+      {
+        error: "Invalid JSON in request body",
+        ...queryParams,
+      },
+      { status: 400 },
+    );
+  }
+}
 
 function queryParamsToJson(searchParams: URLSearchParams) {
   const queryParams: Record<string, string> = {};
@@ -16,37 +38,13 @@ function queryParamsToJson(searchParams: URLSearchParams) {
   return queryParams;
 }
 
-// GET endpoint: converts query params to JSON and responds with JSON
-app.get("/get", async (event) => {
-  return Response.json(queryParamsToJson(event.url.searchParams));
-});
-
-// PATCH endpoint: converts query params to JSON and responds with JSON.
-app.patch("/patch", async (event) => {
-  return Response.json(queryParamsToJson(event.url.searchParams));
-});
-
-// POST endpoint: accepts JSON and responds with JSON. Includes query params in the response.
-app.post("/post", async (event) => {
-  const queryParams = queryParamsToJson(event.url.searchParams);
-  try {
-    const body = await event.req.json()
-    return Response.json({ ...body, ...queryParams });
-  } catch (error) {
-    // If request body is not valid JSON, return error, but include the query params
-    return Response.json(
-      { 
-        error: "Invalid JSON in request body",
-        ...queryParams
-      },
-      { status: 400 }
-    );
-  }
-});
-
 // Export the fetch handler for Cloudflare Workers
 export default {
-  async fetch(request: Request, env: any, ctx: ExecutionContext): Promise<Response> {
+  async fetch(
+    request: Request,
+    env: any,
+    ctx: ExecutionContext,
+  ): Promise<Response> {
     return app.fetch(request);
   },
 };
