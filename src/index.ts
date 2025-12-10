@@ -8,38 +8,37 @@ app.get("/", async (event) => {
   });
 });
 
+function queryParamsToJson(searchParams: URLSearchParams) {
+  const queryParams: Record<string, string> = {};
+  searchParams.forEach((value: string, key: string) => {
+    queryParams[key] = value;
+  });
+  return queryParams;
+}
+
 // GET endpoint: converts query params to JSON and responds with JSON
 app.get("/get", async (event) => {
-  const queryParams: Record<string, string> = {};
-  
-  // Convert URLSearchParams to a plain object
-  event.url.searchParams.forEach((value, key) => {
-    queryParams[key] = value;
-  });
-  
-  return Response.json(queryParams);
+  return Response.json(queryParamsToJson(event.url.searchParams));
 });
 
+// PATCH endpoint: converts query params to JSON and responds with JSON.
 app.patch("/patch", async (event) => {
-  const queryParams: Record<string, string> = {};
-  
-  // Convert URLSearchParams to a plain object
-  event.url.searchParams.forEach((value, key) => {
-    queryParams[key] = value;
-  });
-  
-  return Response.json(queryParams);
+  return Response.json(queryParamsToJson(event.url.searchParams));
 });
 
-// POST endpoint: accepts JSON and responds with JSON
+// POST endpoint: accepts JSON and responds with JSON. Includes query params in the response.
 app.post("/post", async (event) => {
+  const queryParams = queryParamsToJson(event.url.searchParams);
   try {
     const body = await event.req.json()
-    return Response.json(body);
+    return Response.json({ ...body, ...queryParams });
   } catch (error) {
-    // If request body is not valid JSON, return error
+    // If request body is not valid JSON, return error, but include the query params
     return Response.json(
-      { error: "Invalid JSON in request body" },
+      { 
+        error: "Invalid JSON in request body",
+        ...queryParams
+      },
       { status: 400 }
     );
   }
