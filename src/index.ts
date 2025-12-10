@@ -4,12 +4,23 @@ const app = new H3();
 
 app.get("/", async (event) => {
   return Response.json({
-    validRoutes: ['/get', '/post'],
+    validRoutes: ['/get', '/post', '/patch'],
   });
 });
 
 // GET endpoint: converts query params to JSON and responds with JSON
 app.get("/get", async (event) => {
+  const queryParams: Record<string, string> = {};
+  
+  // Convert URLSearchParams to a plain object
+  event.url.searchParams.forEach((value, key) => {
+    queryParams[key] = value;
+  });
+  
+  return Response.json(queryParams);
+});
+
+app.patch("/patch", async (event) => {
   const queryParams: Record<string, string> = {};
   
   // Convert URLSearchParams to a plain object
