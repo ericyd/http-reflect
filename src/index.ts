@@ -7,6 +7,13 @@ app.post("/", reflect);
 app.get("/get", reflect);
 app.patch("/patch", reflect);
 app.post("/post", reflect);
+app.get(
+  "/html",
+  (event) =>
+    new Response("<html><body><h1>Hello, World!</h1></body></html>", {
+      headers: { "Content-Type": "text/html" },
+    })
+);
 
 async function reflect(event: H3Event<EventHandlerRequest>): Promise<Response> {
   const queryParams = queryParamsToJson(event.url.searchParams);
@@ -25,7 +32,7 @@ async function reflect(event: H3Event<EventHandlerRequest>): Promise<Response> {
         error: "Invalid JSON in request body",
         ...queryParams,
       },
-      { status: 400 },
+      { status: 400 }
     );
   }
 }
@@ -43,7 +50,7 @@ export default {
   async fetch(
     request: Request,
     env: any,
-    ctx: ExecutionContext,
+    ctx: ExecutionContext
   ): Promise<Response> {
     return app.fetch(request);
   },
