@@ -24,16 +24,17 @@ async function reflect(event: H3Event<EventHandlerRequest>): Promise<Response> {
 
   try {
     const body = await event.req.json();
-    return Response.json({ ...body, ...queryParams });
+    const params = { ...body, ...queryParams };
+    console.log(params);
+    return Response.json(params);
   } catch (error) {
     // If request body is not valid JSON, return error, but include the query params
-    return Response.json(
-      {
-        error: "Invalid JSON in request body",
-        ...queryParams,
-      },
-      { status: 400 }
-    );
+    const params = {
+      error: "Invalid JSON in request body",
+      ...queryParams,
+    };
+    console.log(params);
+    return Response.json(params, { status: 400 });
   }
 }
 
