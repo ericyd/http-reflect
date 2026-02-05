@@ -1,50 +1,16 @@
-import { EventHandlerRequest, H3, H3Event } from "h3";
+import { H3 } from "h3";
+import * as reflect from "./reflect";
+import * as status from "./status";
+import * as html from "./html";
 
 const app = new H3();
 
-app.get("/", reflect);
-app.post("/", reflect);
-app.get("/get", reflect);
-app.patch("/patch", reflect);
-app.post("/post", reflect);
-app.get(
-  "/html",
-  (event) =>
-    new Response("<html><body><h1>Hello, World!</h1></body></html>", {
-      headers: { "Content-Type": "text/html" },
-    })
-);
-
-async function reflect(event: H3Event<EventHandlerRequest>): Promise<Response> {
-  const queryParams = queryParamsToJson(event.url.searchParams);
-
-  if (event.req.method === "GET") {
-    return Response.json(queryParams);
-  }
-
-  try {
-    const body = await event.req.json();
-    const params = { ...body, ...queryParams };
-    console.log(params);
-    return Response.json(params);
-  } catch (error) {
-    // If request body is not valid JSON, return error, but include the query params
-    const params = {
-      error: "Invalid JSON in request body",
-      ...queryParams,
-    };
-    console.log(params);
-    return Response.json(params, { status: 400 });
-  }
-}
-
-function queryParamsToJson(searchParams: URLSearchParams) {
-  const queryParams: Record<string, string> = {};
-  searchParams.forEach((value: string, key: string) => {
-    queryParams[key] = value;
-  });
-  return queryParams;
-}
+// Register routes from each module
+// Mounting at the root doesn't work, we have to register routes in a different way.
+// We could use this pattern everywhere, but mounting new apps "feels" nicer
+reflect.register(app);
+app.mount("/status", status.app);
+app.mount("/html", html.app);
 
 // Export the fetch handler for Cloudflare Workers
 export default {
