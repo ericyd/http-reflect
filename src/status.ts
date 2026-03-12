@@ -1,4 +1,5 @@
-import { EventHandlerRequest, H3, H3Event } from "h3";
+import { H3, H3Event } from "h3";
+import type { EventHandlerRequest } from "h3";
 
 export const app = new H3();
 

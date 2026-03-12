@@ -1,6 +1,7 @@
-import { EventHandlerRequest, H3, H3Event } from "h3";
-import * as reflect from "./reflect";
-import * as status from "./status";
+import { H3, H3Event } from "h3";
+import type { EventHandlerRequest } from "h3";
+import * as reflect from "./reflect.ts";
+import * as status from "./status.ts";
 
 export const app = new H3();
 

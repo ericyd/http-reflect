@@ -1,8 +1,8 @@
 import { H3 } from "h3";
-import * as reflect from "./reflect";
-import * as status from "./status";
-import * as html from "./html";
-import * as sleep from "./sleep";
+import * as reflect from "./reflect.ts";
+import * as status from "./status.ts";
+import * as html from "./html.ts";
+import * as sleep from "./sleep.ts";
 
 const app = new H3();
 
