@@ -15,7 +15,9 @@ function createApp(): H3 {
 
 test("reflect GET returns query params", async () => {
   const app = createApp();
-  const response = await app.fetch(new Request("http://localhost/?foo=bar&x=1"));
+  const response = await app.fetch(
+    new Request("http://localhost/?foo=bar&x=1")
+  );
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { foo: "bar", x: "1" });
 });
@@ -59,7 +61,10 @@ test("status endpoint returns requested status code and text", async () => {
   const app = createApp();
   const response = await app.fetch(new Request("http://localhost/status/418"));
   assert.equal(response.status, 418);
-  assert.deepEqual(await response.json(), { status: 418, statusText: "I'm a teapot" });
+  assert.deepEqual(await response.json(), {
+    status: 418,
+    statusText: "I'm a teapot",
+  });
 });
 
 test("status endpoint rejects invalid status code", async () => {
@@ -82,7 +87,10 @@ test("sleep reflect endpoint delays before responding", async () => {
 
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { foo: "bar" });
-  assert.ok(elapsedMs >= 25, `Expected at least 25ms delay, got ${elapsedMs}ms`);
+  assert.ok(
+    elapsedMs >= sleepMs,
+    `Expected at least 25ms delay, got ${elapsedMs}ms`
+  );
 });
 
 test("sleep status endpoint delays and preserves status behavior", async () => {
@@ -95,8 +103,14 @@ test("sleep status endpoint delays and preserves status behavior", async () => {
   const elapsedMs = performance.now() - startedAt;
 
   assert.equal(response.status, 201);
-  assert.deepEqual(await response.json(), { status: 201, statusText: "Created" });
-  assert.ok(elapsedMs >= 20, `Expected at least 20ms delay, got ${elapsedMs}ms`);
+  assert.deepEqual(await response.json(), {
+    status: 201,
+    statusText: "Created",
+  });
+  assert.ok(
+    elapsedMs >= sleepMs,
+    `Expected at least 20ms delay, got ${elapsedMs}ms`
+  );
 });
 
 test("sleep endpoints reject invalid duration", async () => {
