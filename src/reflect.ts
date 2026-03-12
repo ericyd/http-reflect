@@ -8,9 +8,7 @@ export function register(app: H3): void {
 export function registerAllMethods(
   app: H3,
   path: string,
-  handler: (
-    event: H3Event<EventHandlerRequest>
-  ) => Response | Promise<Response>
+  handler: (event: H3Event<EventHandlerRequest>) => Response | Promise<Response>
 ): void {
   app.get(path, handler);
   app.post(path, handler);
@@ -35,7 +33,6 @@ export async function reflectRequest(
   try {
     const body = await event.req.json();
     const params = { ...body, ...queryParams };
-    console.log(params);
     return Response.json(params);
   } catch (error) {
     // If request body is not valid JSON, return error, but include the query params
@@ -43,12 +40,13 @@ export async function reflectRequest(
       error: "Invalid JSON in request body",
       ...queryParams,
     };
-    console.log(params);
     return Response.json(params, { status: 400 });
   }
 }
 
-function queryParamsToJson(searchParams: URLSearchParams): Record<string, string> {
+function queryParamsToJson(
+  searchParams: URLSearchParams
+): Record<string, string> {
   const queryParams: Record<string, string> = {};
   searchParams.forEach((value: string, key: string) => {
     queryParams[key] = value;
