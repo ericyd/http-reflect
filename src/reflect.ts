@@ -1,18 +1,30 @@
 import { EventHandlerRequest, H3, H3Event } from "h3";
 
 export function register(app: H3): void {
-  app.get("/", reflect);
-  app.post("/", reflect);
-  app.patch("/", reflect);
-  app.put("/", reflect);
-  app.delete("/", reflect);
-  app.options("/", reflect);
-  app.head("/", reflect);
-  app.trace("/", reflect);
-  app.connect("/", reflect);
+  registerAllMethods(app, "/", reflectRequest);
 }
 
-async function reflect(event: H3Event<EventHandlerRequest>): Promise<Response> {
+export function registerAllMethods(
+  app: H3,
+  path: string,
+  handler: (
+    event: H3Event<EventHandlerRequest>
+  ) => Response | Promise<Response>
+): void {
+  app.get(path, handler);
+  app.post(path, handler);
+  app.patch(path, handler);
+  app.put(path, handler);
+  app.delete(path, handler);
+  app.options(path, handler);
+  app.head(path, handler);
+  app.trace(path, handler);
+  app.connect(path, handler);
+}
+
+export async function reflectRequest(
+  event: H3Event<EventHandlerRequest>
+): Promise<Response> {
   const queryParams = queryParamsToJson(event.url.searchParams);
 
   if (event.req.method === "GET") {
@@ -35,7 +47,7 @@ async function reflect(event: H3Event<EventHandlerRequest>): Promise<Response> {
   }
 }
 
-function queryParamsToJson(searchParams: URLSearchParams) {
+function queryParamsToJson(searchParams: URLSearchParams): Record<string, string> {
   const queryParams: Record<string, string> = {};
   searchParams.forEach((value: string, key: string) => {
     queryParams[key] = value;

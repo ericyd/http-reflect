@@ -2,6 +2,7 @@ import { H3 } from "h3";
 import * as reflect from "./reflect";
 import * as status from "./status";
 import * as html from "./html";
+import * as sleep from "./sleep";
 
 const app = new H3();
 
@@ -11,6 +12,7 @@ const app = new H3();
 reflect.register(app);
 app.mount("/status", status.app);
 app.mount("/html", html.app);
+app.mount("/sleep", sleep.app);
 
 // Export the fetch handler for Cloudflare Workers
 export default {
