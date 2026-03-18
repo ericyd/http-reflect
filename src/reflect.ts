@@ -25,22 +25,34 @@ export async function reflectRequest(
   event: H3Event<EventHandlerRequest>
 ): Promise<Response> {
   const queryParams = queryParamsToJson(event.url.searchParams);
+  const headers = Object.fromEntries(event.req.headers.entries());
 
   if (event.req.method === "GET") {
-    return Response.json(queryParams);
+    return Response.json({
+      query: queryParams,
+      headers,
+      body: null,
+    });
   }
 
   try {
     const body = await event.req.json();
-    const params = { ...body, ...queryParams };
-    return Response.json(params);
-  } catch (error) {
-    // If request body is not valid JSON, return error, but include the query params
-    const params = {
-      error: "Invalid JSON in request body",
-      ...queryParams,
-    };
-    return Response.json(params, { status: 400 });
+    return Response.json({
+      query: queryParams,
+      headers,
+      body,
+    });
+  } catch {
+    // If request body is not valid JSON, return a 400 with reflected request metadata.
+    return Response.json(
+      {
+        query: queryParams,
+        headers,
+        body: null,
+        error: "Invalid JSON in request body",
+      },
+      { status: 400 }
+    );
   }
 }
 

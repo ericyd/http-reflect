@@ -13,31 +13,45 @@ function createApp(): H3 {
   return app;
 }
 
-test("reflect GET returns query params", async () => {
+test("reflect GET returns query, headers, and body keys", async () => {
   const app = createApp();
   const response = await app.fetch(
-    new Request("http://localhost/?foo=bar&x=1")
+    new Request("http://localhost/?foo=bar&x=1", {
+      headers: { "x-test-header": "hello" },
+    })
   );
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { foo: "bar", x: "1" });
+  const reflected = await response.json();
+  assert.deepEqual(reflected.query, { foo: "bar", x: "1" });
+  assert.equal(reflected.headers["x-test-header"], "hello");
+  assert.equal(reflected.body, null);
 });
 
-test("reflect POST merges body and query params", async () => {
+test("reflect POST keeps query, headers, and body separate", async () => {
   const app = createApp();
   const response = await app.fetch(
     new Request("http://localhost/?fromQuery=2&shared=query", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        "x-test-header": "post-header",
+      },
       body: JSON.stringify({ fromBody: 1, shared: "body" }),
     })
   );
 
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), {
-    fromBody: 1,
+  const reflected = await response.json();
+  assert.deepEqual(reflected.query, {
     fromQuery: "2",
     shared: "query",
   });
+  assert.deepEqual(reflected.body, {
+    fromBody: 1,
+    shared: "body",
+  });
+  assert.match(reflected.headers["content-type"] ?? "", /^application\/json\b/);
+  assert.equal(reflected.headers["x-test-header"], "post-header");
 });
 
 test("reflect POST with invalid JSON returns 400", async () => {
@@ -51,10 +65,11 @@ test("reflect POST with invalid JSON returns 400", async () => {
   );
 
   assert.equal(response.status, 400);
-  assert.deepEqual(await response.json(), {
-    error: "Invalid JSON in request body",
-    foo: "bar",
-  });
+  const reflected = await response.json();
+  assert.deepEqual(reflected.query, { foo: "bar" });
+  assert.equal(reflected.body, null);
+  assert.equal(reflected.error, "Invalid JSON in request body");
+  assert.match(reflected.headers["content-type"] ?? "", /^application\/json\b/);
 });
 
 test("status endpoint returns requested status code and text", async () => {
@@ -81,12 +96,17 @@ test("sleep reflect endpoint delays before responding", async () => {
   const sleepMs = 40;
   const startedAt = performance.now();
   const response = await app.fetch(
-    new Request(`http://localhost/sleep/${sleepMs}?foo=bar`)
+    new Request(`http://localhost/sleep/${sleepMs}?foo=bar`, {
+      headers: { "x-test-header": "sleepy" },
+    })
   );
   const elapsedMs = performance.now() - startedAt;
 
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { foo: "bar" });
+  const reflected = await response.json();
+  assert.deepEqual(reflected.query, { foo: "bar" });
+  assert.equal(reflected.headers["x-test-header"], "sleepy");
+  assert.equal(reflected.body, null);
   assert.ok(
     elapsedMs >= sleepMs,
     `Expected at least 25ms delay, got ${elapsedMs}ms`
