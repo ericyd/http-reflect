@@ -1,0 +1,20 @@
+meta {
+  name: /?test=true
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/?test=true
+  body: none
+  auth: inherit
+}
+
+params:query {
+  test: true
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

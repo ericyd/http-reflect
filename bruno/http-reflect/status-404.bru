@@ -1,0 +1,16 @@
+meta {
+  name: /status/404
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/status/404
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

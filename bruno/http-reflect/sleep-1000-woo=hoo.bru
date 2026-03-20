@@ -1,0 +1,20 @@
+meta {
+  name: /sleep/1000?woo=hoo
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/sleep/2000?woo=hoo
+  body: none
+  auth: inherit
+}
+
+params:query {
+  woo: hoo
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

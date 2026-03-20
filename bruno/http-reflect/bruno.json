@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "HTTP Reflect",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

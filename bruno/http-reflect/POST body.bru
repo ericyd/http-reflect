@@ -1,0 +1,26 @@
+meta {
+  name: POST body
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/?test=true
+  body: json
+  auth: inherit
+}
+
+params:query {
+  test: true
+}
+
+body:json {
+  {
+    "adjective": "{{$randomAdjective}}"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
